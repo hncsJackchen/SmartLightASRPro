@@ -12,18 +12,23 @@ uint32_t snid;
 void ASR_CODE();
 
 //{speak:思思-知性女声,vol:10,speed:10,platform:haohaodada}
-//{playid:10001,voice:欢迎使用智能语音助手，用追随我心唤醒我。}
-//{playid:10002,voice:我退下了，用追随我心唤醒我。}
+//{playid:10001,voice:欢迎使用智能语音助手，用智能灯光唤醒我。}
+//{playid:10002,voice:我退下了，用智能灯光唤醒我。}
+//{playid:10003,voice:已打开灯光}
+//{playid:10004,voice:已关闭灯光}
+//{playid:10005,voice:灯光已开}
+//{playid:10006,voice:灯光已关}
+//{playid:10007,voice:操作失败}
 
-// 读取一行串口回复（以 \n 结尾），超时返回已读内容；用于接收 ESP-12F 的响应帧
+// 读取超时窗口内收到的所有串口字符（去掉换行）后返回；
+// 不读到首行即返回，以免 ESP-12F 的调试日志把响应帧挤在后面导致误判
 String readResp(uint32_t timeoutMs) {
   String s = "";
   uint32_t start = millis();
   while (millis() - start < timeoutMs) {
     while (Serial.available()) {
       char c = Serial.read();
-      if (c == '\n') return s;
-      if (c != '\r') s += c;
+      if (c != '\r' && c != '\n') s += c;
     }
     delay(1);
   }
@@ -41,13 +46,10 @@ void ASR_CODE(){
     Serial.println("ON");
     String resp = readResp(2000);
     if(resp.indexOf("ON_OK") >= 0){
-      //{playid:10003,voice:已打开灯光}
       play_audio(10003);
     }else if(resp.indexOf("ON_SKIP") >= 0){
-      //{playid:10005,voice:灯光已开}
       play_audio(10005);
     }else{
-      //{playid:10007,voice:操作失败}
       play_audio(10007);
     }
   }else if(snid == 2 || snid == 4){
@@ -55,13 +57,10 @@ void ASR_CODE(){
     Serial.println("OFF");
     String resp = readResp(2000);
     if(resp.indexOf("OFF_OK") >= 0){
-      //{playid:10004,voice:已关闭灯光}
       play_audio(10004);
     }else if(resp.indexOf("OFF_SKIP") >= 0){
-      //{playid:10006,voice:灯光已关}
       play_audio(10006);
     }else{
-      //{playid:10007,voice:操作失败}
       play_audio(10007);
     }
   }
@@ -83,7 +82,7 @@ void setup()
 {
   //需要操作系统启动前初始化的内容
   //唤醒词最多5个，回复语可空，ID范围 0-9999
-  //{ID:0,keyword:"唤醒词",ASR:"追随我心",ASRTO:"在的"}
+  //{ID:0,keyword:"唤醒词",ASR:"智能灯光",ASRTO:"在的"}
   //{ID:1,keyword:"命令词",ASR:"打开灯光",ASRTO:""}
   //{ID:2,keyword:"命令词",ASR:"关闭灯光",ASRTO:""}
   //{ID:3,keyword:"命令词",ASR:"开灯",ASRTO:""}

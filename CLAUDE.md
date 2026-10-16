@@ -40,4 +40,4 @@ SDK 调用三个固定入口：
 - 串口 `Serial` 9600 接 ESP-12F：TX=PB5(13)、RX=PB6(14)。
 - 命令 ID：1「打开灯光」/3「开灯」→ 发 `ON`；2「关闭灯光」/4「关灯」→ 发 `OFF`。
 - 发送后带 2s 超时读一行响应，按响应播报（`ON_OK`/`OFF_OK`/`ON_SKIP`/`OFF_SKIP`/`ERROR`，见 README）。
-- 唤醒词「追随我心」；`set_state_enter_wakeup(20000)` 使 20 秒无命令后休眠，唤醒后重新说唤醒词。
+- 唤醒词「智能灯光」；`set_state_enter_wakeup(20000)` 使 20 秒无命令后休眠，唤醒后重新说唤醒词。
