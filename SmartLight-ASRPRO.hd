@@ -18,8 +18,8 @@ void ASR_CODE();
 //{playid:10004,voice:已关闭灯光}
 //{playid:10007,voice:操作失败}
 
-// 读取超时窗口内收到的所有串口字符（去掉换行）后返回；
-// 不读到首行即返回，以免 ESP-12F 的调试日志把响应帧挤在后面导致误判
+// 读取超时窗口内的串口字符（去掉换行），一旦收到完整响应帧立即返回：
+// ESP-12F 舵机动作约 750ms 后才回帧，提前返回可避免干等满整个超时、缩短播报延迟
 String readResp(uint32_t timeoutMs) {
   String s = "";
   uint32_t start = millis();
@@ -27,6 +27,10 @@ String readResp(uint32_t timeoutMs) {
     while (Serial.available()) {
       char c = Serial.read();
       if (c != '\r' && c != '\n') s += c;
+    }
+    if (s.indexOf("ON_OK") >= 0 || s.indexOf("OFF_OK") >= 0 ||
+        s.indexOf("ERROR") >= 0) {
+      break;
     }
     delay(1);
   }
@@ -57,6 +61,9 @@ void ASR_CODE(){
     }else{
       play_audio(10007);
     }
+  }else if(snid == 5){
+    // 退出语音：立即退出唤醒（进入休眠），退出提示音自动播报
+    exit_wakeup_deal(0);
   }
 }
 
@@ -81,6 +88,7 @@ void setup()
   //{ID:2,keyword:"命令词",ASR:"关闭灯光",ASRTO:""}
   //{ID:3,keyword:"命令词",ASR:"开灯",ASRTO:""}
   //{ID:4,keyword:"命令词",ASR:"关灯",ASRTO:""}
+  //{ID:5,keyword:"命令词",ASR:"退出",ASRTO:""}
 }
 
 
